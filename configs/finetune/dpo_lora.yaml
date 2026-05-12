@@ -23,13 +23,13 @@ training:
   output_dir:                         # where to save checkpoints
     /content/drive/MyDrive/_Spring26/ADL/refusal-representations/checkpoints
 
-  data:
-    dataset: Anthropic/hh-rlhf        # dataset HF ID
-    subset: harmless-base             # subset we'll use
-    train_split: train                # split to train on
-    max_samples: 5000                 # how much data we'll use
-    seed: 42                          # for reproducibility
+data:
+  dataset: Anthropic/hh-rlhf        # dataset HF ID
+  subset: harmless-base             # subset we'll use
+  train_split: train                # split to train on
+  max_samples: 5000                 # how much data we'll use
+  seed: 42                          # for reproducibility
 
-  wandb:
-    project: refusal-representations  # W&B project name
-    run_name: dpo-lora-r16-5k-samples # W&B run name
+wandb:
+  project: refusal-representations  # W&B project name
+  run_name: dpo-lora-r16-5k-samples # W&B run name
