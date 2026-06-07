@@ -10,7 +10,6 @@ model:                                # eval on both SFT and DPO model
 evaluation:
   max_new_tokens: 200                 # max tokens in response
   batch_size: 8
-  seed: 42
 
 refusal:
   method: keyword                     # keyword-matching to detect refusal

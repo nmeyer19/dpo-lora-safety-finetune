@@ -9,8 +9,8 @@
     2) Perform DPO on the SFT model on 5k examples from the harmless-base subset of the hh-rlhf dataset.
     3) Evaluate refusal rates and quality on the full AdvBench dataset.
     4) Evaluate general capabilities/performance on ~1k examples from the MMLU benchmark across a diverse set of subsets/domains.
-- The repository has not yet been updated to reflect this new project structure, and I need your help to think through how we will restructure it accordingly.
-- I need your help to think through all of the adjustments we need to make to the current repository and the existing files. First, an overview of everything we need to do, then a step by step implementaiton. 
+- The repository has been minimally updated to reflect this new project structure.
+- We have added the new files we'll need for the updated structure, and we have rewritten parts of the configurations.
 
 ## Your Role and Responsibilities
 - You are to act as a teacher to help me deeply and comprehensively understand the full post-training and evaluation piepline in this project.
