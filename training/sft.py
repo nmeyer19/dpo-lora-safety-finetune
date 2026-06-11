@@ -1,7 +1,10 @@
 import yaml
 from data.loaders.dolly import DollyDataLoader
-from transformers import AutoTokenizer
-import models.loader
+from transformers import get_linear_schedule_with_warmup, DataCollatorForSeq2Seq
+from models.loader import load_model
+from peft import get_peft_model, LoraConfig, TaskType
+import torch
+from torch.utils.data import DataLoader
 
 # load the config
 with open("./configs/sft.yaml", "r") as file:
@@ -12,8 +15,8 @@ dataloader = DollyDataLoader(config)
 dataloader.load()
 dataset = dataloader.get_data()
 
-# tokenizer
-tokenizer = AutoTokenizer.from_pretrained(config["model"]["name"])
+# load base model and tokenizer
+base_model, tokenizer = load_model(config)
 
 # tokenizes an example and masks the prompt tokens
 def tokenize(example):
@@ -36,19 +39,50 @@ def tokenize(example):
 
 tokenized_dataset = dataset.map(tokenize, remove_columns=dataset.column_names)
 
+# construct the lora model
+lora_config = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    r=config["lora"]["r"],
+    target_modules=config["lora"]["target_modules"],
+    lora_alpha=config["lora"]["alpha"],
+    lora_dropout=config["lora"]["dropout"],
+)
+lora_model = get_peft_model(base_model, lora_config)
+# trainable params: 1,703,936 || all params: 1,237,518,336 || trainable%: 0.1377
+
+# optimizer: AdamW
+optimizer = torch.optim.AdamW(lora_model.parameters(), 
+                              lr=config["training"]["learning_rate"])
+
+# HF Seq2Seq collator for masked padding
+collator = DataCollatorForSeq2Seq(tokenizer, lora_model, padding=True, 
+                                  label_pad_token_id=-100)
+
+# torch dataloader for training
+train_dataloader = DataLoader(tokenized_dataset, 
+                              batch_size=config["training"]["batch_size"],
+                              shuffle=True, collate_fn=collator)
+
+total_steps = ((len(train_dataloader) // 
+               config["training"]["gradient_accumulation_steps"]) * 
+               config["training"]["num_epochs"])
+
+# lr scheduler
+scheduler = get_linear_schedule_with_warmup(
+    optimizer,
+    num_warmup_steps=config["training"]["warmup_steps"],
+    num_training_steps=total_steps)
+
+# put the model in training mode
+lora_model.train()
+
+# training loop
+
 
 
 """
-3a. load the base model with models/loader.py and load the lora adapters w PEFT
-- get_peft_model() to load
-- model.print_trainable_parameters() to check 
-3b. wrap the base model with the lora adapters for SFT       
-4a. set up the optimizer, LR schedulder + warmup
-- remember we're doing 4 gradient accumulation steps
 4b. write the training loop itself (foward pass, loss, backward pass, 
 optimizer.step)
-- add padding to concatenated sequence: DataLoader with a collator for padding 
-and mask padding tokens
 - for each batch, loss = forward_pass(batch) / gradient_accumulation_steps
 before calling loss.backward()
 - only if step % gradient_accumulation_steps == 0 then optimizer.step() and
