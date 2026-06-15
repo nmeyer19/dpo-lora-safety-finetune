@@ -15,7 +15,6 @@ def load_model(
     base_model = AutoModelForCausalLM.from_pretrained(
         cfg["name"], 
         torch_dtype=getattr(torch, cfg["torch_dtype"]),
-        device_map="auto"
     )
 
     if checkpoint_path:
