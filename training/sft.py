@@ -5,6 +5,7 @@ from models.loader import load_model
 from peft import get_peft_model, LoraConfig, TaskType
 import torch
 from torch.utils.data import DataLoader
+import wandb 
 
 # load the config
 with open("./configs/sft.yaml", "r") as file:
@@ -73,22 +74,50 @@ scheduler = get_linear_schedule_with_warmup(
     num_warmup_steps=config["training"]["warmup_steps"],
     num_training_steps=total_steps)
 
-# put the model in training mode
+# train mode
 lora_model.train()
 
-# training loop
+# training-relevant initializations
+acc_loss = 0
+step = 1
 
+total_epochs = config["training"]["num_epochs"]
+gradient_accumulations = config["training"]["gradient_accumulation_steps"]
+logging_steps = config["training"]["logging_steps"]
 
+wandb.init(project=config["wandb"]["project"],
+           name=config["wandb"]["run_name"],
+           config=config)
 
-"""
-4b. write the training loop itself (foward pass, loss, backward pass, 
-optimizer.step)
-- for each batch, loss = forward_pass(batch) / gradient_accumulation_steps
-before calling loss.backward()
-- only if step % gradient_accumulation_steps == 0 then optimizer.step() and
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+lora_model = lora_model.to(device)
+
+# just in case
 optimizer.zero_grad()
-4c. within the training loop, log to wandb                  
-5. save final lora adapter matrices/weights 
-- model.save_pretrained(output_dir) - saves only the adapter matrices and the
-lora config
-"""
+
+# training loop
+for epoch in range(total_epochs):
+    for batch in train_dataloader:
+        batch = {k: v.to(device) for k, v in batch.items()} # move batch to GPU
+        outputs = lora_model(**batch)                       # forward pass
+        loss = outputs.loss / gradient_accumulations        # normalized loss
+        acc_loss += loss.item()                             # accumulated loss
+        loss.backward()                                     # backward pass
+                                                            # accumulates gradients
+
+        if step % gradient_accumulations == 0:
+            optimizer.step()                                # update weights
+            optimizer.zero_grad()                           # zero out accumulated gradients
+            scheduler.step()                                # update LR
+            
+            if step % (gradient_accumulations * logging_steps) == 0:
+                wandb.log({"loss": acc_loss, "lr": scheduler.get_last_lr()[0]})
+            
+            acc_loss = 0                                    # reset accumulation
+        
+        step += 1
+
+# save everything
+lora_model.save_pretrained(config["outputs"]["model_dir"])
+tokenizer.save_pretrained(config["outputs"]["model_dir"])
+wandb.finish()
