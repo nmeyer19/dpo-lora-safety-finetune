@@ -12,7 +12,7 @@ lora:
     - v_proj                          # value projection
 
 training:
-  learning_rate: 2e-5                 # 2e-5 standard for SFT w/ LoRA
+  learning_rate: 0.00002              # 2e-5 standard for SFT w/ LoRA
   batch_size: 4                       # batch size
   num_epochs: 3                       # epochs
   warmup_steps: 100                   # learning rate warmup
