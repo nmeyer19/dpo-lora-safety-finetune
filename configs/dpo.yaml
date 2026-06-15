@@ -2,7 +2,7 @@ model:
   name:                               # SFT model location
     /content/drive/MyDrive/llama-sft-dpo-lora/sft/sft_model
   max_length: 512                     # max sequence length
-  torch_dtype: bfloat16               # 16bit float weights for mem efficiency
+  dtype: bfloat16                     # 16bit float weights for mem efficiency
 
 lora:
   r: 16                               # bottleneck rank

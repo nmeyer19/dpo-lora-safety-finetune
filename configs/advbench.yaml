@@ -5,7 +5,7 @@ benchmark:
   prompt_column: prompt               # column in the dataset with the prompts
 
 model:                                # eval on both SFT and DPO model
-  torch_dtype: bfloat16               # 16bit float weights for mem efficiency
+  dtype: bfloat16                     # 16bit float weights for mem efficiency
 
 evaluation:
   max_new_tokens: 200                 # max tokens in response

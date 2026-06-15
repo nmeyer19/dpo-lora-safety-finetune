@@ -29,7 +29,7 @@ benchmark:
     'virology', 'world_religions']
     
 model:
-  torch_dtype: bfloat16
+  dtype: bfloat16
 
 evaluation:
   max_new_tokens: 10

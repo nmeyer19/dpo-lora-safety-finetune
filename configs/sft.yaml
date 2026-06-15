@@ -1,7 +1,7 @@
 model:
   name: meta-llama/Llama-3.2-1B       # HF location of base model
   max_length: 512                     # max sequence length
-  torch_dtype: bfloat16               # 16bit float weights for mem efficiency
+  dtype: bfloat16                     # 16bit float weights for mem efficiency
 
 lora:
   r: 16                               # bottleneck rank
