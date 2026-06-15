@@ -1,5 +1,6 @@
 model:
-  name:                               # SFT model location
+  name: meta-llama/Llama-3.2-1B       # HF location of base model  
+  checkpoint_path:                    # location of the saved LoRA adapters
     /content/drive/MyDrive/llama-sft-dpo-lora/sft/sft_model
   max_length: 512                     # max sequence length
   dtype: bfloat16                     # 16bit float weights for mem efficiency
