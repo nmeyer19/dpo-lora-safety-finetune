@@ -28,10 +28,16 @@ class MMLUBenchmark(BaseBenchmark):
         # infer device from model
         device = next(self.model.parameters()).device
 
-        # response tracker
+        # response tracker - list of dicts
         self.responses = []
+        
+        # subject counters for self.results
+        subj_corr = {}
+        subj_total = {}
+        subj_acc = {}
 
         # evaluation loop
+        self.model.eval()
         batch_size = self.config["evaluation"]["batch_size"]
 
         with torch.no_grad():
@@ -79,19 +85,21 @@ class MMLUBenchmark(BaseBenchmark):
                 pred_ids = pred_ids.tolist()
                 predictions = [["A", "B", "C", "D"][idx] for idx in pred_ids]
 
-                # compare to correct answers
-                answers = batch["answer"]
+                subjects = batch["subject"]    # list of batch subjects
+                prompts = batch["prompt"]     # list of batch prompts
+                answers = batch["answer"]     # list of batch answers
+                
+                for sj, pt, an, pd in zip(subjects, prompts, answers, predictions):
+                    self.responses.append({"subject": sj,
+                                           "prompt": pt,
+                                           "answer": an,
+                                           "prediction": pd,
+                                           "correct": an == pd})
+                    
+                    if an == pd: subj_corr[sj] = subj_corr.get(sj, 0) + 1
+                    subj_total[sj] = subj_total.get(sj, 0) + 1
+                    subj_acc[sj] = subj_corr.get(sj, 0) / subj_total[sj]
 
+        total_acc = sum(subj_corr.values()) / sum(subj_total.values())
 
-
-# needs to instantiate self.results and self.responses for save_results to function
-
-"""
-for every batch, we have:                           
-  - the batch data: subject, prompt, answer
-  - eval data: prediction, correct (bool: if prediction == answer)
-
-in terms of what we want to record, we have: self.responses, self.results
-  - self.responses: batch data + eval data
-  - self.results: per-subject tallys, total tally
-"""
+        self.results = {"per_subject": subj_acc, "total": total_acc}
