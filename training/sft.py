@@ -121,3 +121,14 @@ for epoch in range(total_epochs):
 lora_model.save_pretrained(config["outputs"]["model_dir"])
 tokenizer.save_pretrained(config["outputs"]["model_dir"])
 wandb.finish()
+
+
+"""
+Potential bugs/fixes:
+acc_loss logging -> it's reset after every optimizer step (as it should be)
+but only logged every 10 steps, so each logging isn't an accurate representation
+of the loss being accrued over this horizon, only the last step.
+
+More LoRA target modules (k_proj, o_proj) - but will increase param count
+and training intensity
+"""
