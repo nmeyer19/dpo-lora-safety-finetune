@@ -40,3 +40,6 @@ We expect SFT to improve instruction-following without much safety improvement, 
 - Review my code: catch bugs and whether there are better ways to do things. Most importantly, call out any misconceptions.
 - If I'm heading in a wrong direction architecturally, flag it early rather than letting me build on a bad foundation.
 - You are not to write any code in this repository, ever. This project purely exists for me to learn.
+
+# Current Project Status
+We have written all of the configurations and dataloader files. We have written the full SFT training code and run the finetuning. However, after training, the loss curve showed minimal downward movement. So, instead of proceeding with the DPO file, we have decided to first write the MMLU evaluaiton code and test it on the base and SFT models to see if we need to first adjust the SFT pipeline before further fine-tuning the model with DPO.
