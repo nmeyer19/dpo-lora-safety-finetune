@@ -21,9 +21,9 @@ models = [
     {"name": "sft-model", 
      "config": sft_config, 
      "checkpoint": sft_config["outputs"]["model_dir"]},
-    {"name": "dpo-model", 
-    "config": dpo_config, 
-    "checkpoint": dpo_config["outputs"]["model_dir"]},
+    #{"name": "dpo-model", 
+    #"config": dpo_config, 
+    #"checkpoint": dpo_config["outputs"]["model_dir"]},
 ]
 
 # set device
