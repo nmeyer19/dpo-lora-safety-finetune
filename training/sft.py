@@ -40,6 +40,17 @@ def tokenize(example):
 
 tokenized_dataset = dataset.map(tokenize, remove_columns=dataset.column_names)
 
+"""
+Potential tokenization boundary bug: 
+prompt_len is computed by tokenizing the prompt separately, but BPE tokenizers
+are context-sensitive — the tokens at the prompt/response boundary may differ 
+when tokenized alone vs. as part of the full string. 
+This can cause prompt_len to be off by 1-2 tokens, slightly misaligning the 
+-100 label mask.
+Fix by computing the boundary via token ID comparison rather than independent 
+length counts.
+"""
+
 # construct the lora model
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
@@ -124,11 +135,12 @@ wandb.finish()
 
 
 """
-Potential bugs/fixes:
+Logging bug
 acc_loss logging -> it's reset after every optimizer step (as it should be)
 but only logged every 10 steps, so each logging isn't an accurate representation
 of the loss being accrued over this horizon, only the last step.
 
+General improvement
 More LoRA target modules (k_proj, o_proj) - but will increase param count
 and training intensity
 """
