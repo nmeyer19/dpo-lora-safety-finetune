@@ -32,7 +32,6 @@ model:
   dtype: bfloat16
 
 evaluation:
-  max_new_tokens: 10
   batch_size: 8
 
 outputs:
