@@ -21,6 +21,8 @@ class BaseBenchmark(ABC):
         self.config = config
         self.model = model
         self.tokenizer = tokenizer
+        self.results = None
+        self.responses = []
 
     def run(self) -> None:
         """Load, evaluate, and save results."""
@@ -36,7 +38,7 @@ class BaseBenchmark(ABC):
     @abstractmethod
     def evaluate(self) -> None:
         """Evaluate the model on the benchmark."""
-        # needs to instantiate self.results and self.responses
+        # needs to populate self.results and self.responses
         # for save_results to function
         ...
 
@@ -46,11 +48,19 @@ class BaseBenchmark(ABC):
         path = self.config["outputs"]["results_dir"]
         os.makedirs(path, exist_ok=True)
         
+        # make sure result and response fields filled in evaluate()
+        if self.results is None:
+            raise RuntimeError("save_results() called with no results. "
+                               "Check if evaluate() ran correctly.")
+        if not self.responses:
+            raise RuntimeError("save_results() called with no responses. "
+                               "Check if evaluate() ran correctly.")
+
         # save high-level info in a json file
         with open(path + "/results.json", "w") as file:
             json.dump(self.results, file)
         
-        # save all outputs in a csv file
+        # save all outputs in a csv file        
         with open(path + "/results.csv", "w") as file:
             writer = csv.DictWriter(file, fieldnames=self.responses[0].keys())
             writer.writeheader()
