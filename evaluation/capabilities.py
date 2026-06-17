@@ -30,12 +30,12 @@ models = [
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # set base results_dir for proper directory saving
-base_results_dir = mmlu_config["outputs"]["results_dir"]
+gen_results_dir = mmlu_config["outputs"]["results_dir"]
 
 for m in models:
     # kick things off and reconfigure output location
     print(f"\nevaluating {m['name']}...")
-    mmlu_config["outputs"]["results_dir"] = base_results_dir + "/" + m["name"]
+    mmlu_config["outputs"]["results_dir"] = gen_results_dir + "/" + m["name"]
 
     # load model and put it on the gpu
     model, tokenizer = load_model(m["config"], checkpoint_path=m["checkpoint"])
