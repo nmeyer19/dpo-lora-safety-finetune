@@ -20,7 +20,7 @@ class MMLUDataLoader(BaseDataLoader):
             for subject in cfg["subjects"]:
                 subject_data = raw_dataset.filter(lambda x, s=subject: x["subject"] == s)
                 subject_data = subject_data.shuffle(seed=cfg["seed"])
-                subject_data = subject_data.select(range(samps_per_subj))
+                subject_data = subject_data.select(min(samps_per_subj, len(subject_data)))
                 subject_datasets.append(subject_data)
             
             full_dataset = concatenate_datasets(subject_datasets)
