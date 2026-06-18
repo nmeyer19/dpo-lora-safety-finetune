@@ -32,9 +32,9 @@ class DollyDataLoader(BaseDataLoader):
         response = example["response"]
 
         if context:
-            prompt = f"Instruction: {instruction}\nContext: {context}\nResponse:"
+            prompt = f"Instruction: {instruction}\nContext: {context}\nResponse: "
         else: 
-            prompt = f"Instruction: {instruction}\nResponse:"
+            prompt = f"Instruction: {instruction}\nResponse: "
         
         return {
             "prompt": prompt,
