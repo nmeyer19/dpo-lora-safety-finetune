@@ -20,10 +20,10 @@ class MMLUBenchmark(BaseBenchmark):
         """Evaluate the model on the MMLU benchmark."""
         
         # get IDs for target tokens
-        id_a = self.tokenizer.convert_tokens_to_ids(" A")
-        id_b = self.tokenizer.convert_tokens_to_ids(" B")
-        id_c = self.tokenizer.convert_tokens_to_ids(" C")
-        id_d = self.tokenizer.convert_tokens_to_ids(" D")
+        id_a = self.tokenizer.encode(" A", add_special_tokens=False)[-1]
+        id_b = self.tokenizer.encode(" B", add_special_tokens=False)[-1]
+        id_c = self.tokenizer.encode(" C", add_special_tokens=False)[-1]
+        id_d = self.tokenizer.encode(" D", add_special_tokens=False)[-1]
 
         # infer device from model
         device = next(self.model.parameters()).device
@@ -85,9 +85,9 @@ class MMLUBenchmark(BaseBenchmark):
                 pred_ids = pred_ids.tolist()
                 predictions = [["A", "B", "C", "D"][idx] for idx in pred_ids]
 
-                subjects = batch["subject"]    # list of batch subjects
-                prompts = batch["prompt"]     # list of batch prompts
-                answers = batch["answer"]     # list of batch answers
+                subjects = list(batch["subject"])   # list of batch subjects
+                prompts = list(batch["prompt"])     # list of batch prompts
+                answers = list(batch["answer"])     # list of batch answers
                 
                 for sj, pt, an, pd in zip(subjects, prompts, answers, predictions):
                     self.responses.append({"subject": sj,
