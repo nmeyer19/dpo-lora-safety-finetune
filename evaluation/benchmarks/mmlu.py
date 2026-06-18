@@ -46,7 +46,7 @@ class MMLUBenchmark(BaseBenchmark):
                 batch = self.data.select(range(i, min(i + batch_size, 
                                                       len(self.data))))
                 # tokenize prompts and move to device
-                tokenized_prompts = self.tokenizer(batch["prompt"], 
+                tokenized_prompts = self.tokenizer(list(batch["prompt"]), 
                                                    return_tensors="pt",
                                                    padding=True, 
                                                    truncation=True)
