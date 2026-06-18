@@ -13,12 +13,14 @@ def load_model(
     
     # no padding by default w llama - need to add
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-    model.resize_token_embeddings(len(tokenizer))
 
     base_model = AutoModelForCausalLM.from_pretrained(
         cfg["name"], 
         dtype=getattr(torch, cfg["dtype"]),
     )
+
+    # resize token embedding dimension to account for the new pad token
+    base_model.resize_token_embeddings(len(tokenizer))
 
     if checkpoint_path:
         lora_model = PeftModel.from_pretrained(base_model, checkpoint_path)
