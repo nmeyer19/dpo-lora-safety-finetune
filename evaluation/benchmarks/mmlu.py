@@ -94,9 +94,9 @@ class MMLUBenchmark(BaseBenchmark):
                                            "prompt": pt,
                                            "answer": an,
                                            "prediction": pd,
-                                           "correct": ["A","B","C","D"]an == pd})
+                                           "correct": ["A","B","C","D"][an] == pd})
                     
-                    if ["A","B","C","D"]an == pd: subj_corr[sj] = subj_corr.get(sj, 0) + 1
+                    if ["A","B","C","D"][an] == pd: subj_corr[sj] = subj_corr.get(sj, 0) + 1
                     subj_total[sj] = subj_total.get(sj, 0) + 1
                     subj_acc[sj] = subj_corr.get(sj, 0) / subj_total[sj]
 
