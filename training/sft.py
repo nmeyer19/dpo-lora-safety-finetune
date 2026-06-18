@@ -21,35 +21,33 @@ base_model, tokenizer = load_model(config)
 
 # tokenizes an example and masks the prompt tokens
 def tokenize(example):
-    # tokenize full example text
-    example_text = example["prompt"] + example["response"]
-    tokenized_ex = tokenizer(example_text, truncation=True, 
-                             max_length=config["model"]["max_length"],
-                             padding=False)
-    # mask prompt tokens for no gradient signal
-    prompt_len = len(tokenizer(example["prompt"], truncation=True,
-                     max_length=config["model"]["max_length"],
-                     padding=False)["input_ids"])
-    labels = tokenized_ex["input_ids"].copy()
-    for i in range(prompt_len):
-        labels[i] = -100
-    # create a new field indicating which tokens to ignore in gradient calcs
-    tokenized_ex["labels"] = labels 
+    # tokenize prompt and response separately
+    tokenized_prompt = tokenizer(example["prompt"], padding=False)
     
-    return tokenized_ex
+    tokenized_response = tokenizer(example["response"], padding=False, 
+                                   add_special_tokens=False)
+
+    # concatenate token ids and truncate to max_length config
+    prompt_ids = tokenized_prompt["input_ids"] 
+    response_ids = tokenized_response["input_ids"]
+    input_ids = prompt_ids + response_ids
+    input_ids = input_ids[:config["model"]["max_length"]]
+
+    # mask prompt tokens for no gradient signal and truncate length
+    # and truncate to max_length config
+    labels = [-100]*len(prompt_ids) + response_ids
+    labels = labels[:config["model"]["max_length"]]
+
+    # attention_mask all 1s (inherits truncation from labels)
+    attention_mask = [1] * len(input_ids)
+
+    return {
+        "input_ids": input_ids,
+        "attention_mask": attention_mask,
+        "labels": labels
+    }
 
 tokenized_dataset = dataset.map(tokenize, remove_columns=dataset.column_names)
-
-"""
-Potential tokenization boundary bug: 
-prompt_len is computed by tokenizing the prompt separately, but BPE tokenizers
-are context-sensitive — the tokens at the prompt/response boundary may differ 
-when tokenized alone vs. as part of the full string. 
-This can cause prompt_len to be off by 1-2 tokens, slightly misaligning the 
--100 label mask.
-Fix by computing the boundary via token ID comparison rather than independent 
-length counts.
-"""
 
 # construct the lora model
 lora_config = LoraConfig(
@@ -122,9 +120,9 @@ for epoch in range(total_epochs):
             scheduler.step()                                # update LR
             
             if step % (gradient_accumulations * logging_steps) == 0:
-                wandb.log({"loss": acc_loss, "lr": scheduler.get_last_lr()[0]})
-            
-            acc_loss = 0                                    # reset accumulation
+                wandb.log({"loss": acc_loss / logging_steps, 
+                           "lr": scheduler.get_last_lr()[0]})
+                acc_loss = 0                                # reset accumulation
         
         step += 1
 
