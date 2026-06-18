@@ -10,7 +10,10 @@ def load_model(
     
     cfg = config["model"]
     tokenizer = AutoTokenizer.from_pretrained(cfg["name"])
-    tokenizer.pad_token = tokenizer.eos_token   # no padding by default w llama
+    
+    # no padding by default w llama - need to add
+    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+    model.resize_token_embeddings(len(tokenizer))
 
     base_model = AutoModelForCausalLM.from_pretrained(
         cfg["name"], 
