@@ -49,15 +49,15 @@ What's been written so far:
     - SFT: training script and run notebook
     - DPO: part of training script
 - Evaluations
-    - base benchmark class, MMLU class
+    - base benchmark class, MMLU class, capabilities script, MMLU eval notebook
 
 To Do:
 - Finetuning
+    - SFT training script adjustments
     - DPO training script
     - DPO run notebook
 - Evaluations
-    - MMLU eval notebook
     - refusal script
     - AdvBench class and eval notebook
 
-After SFT training, the loss curve showed minimal downward movement. So, instead of proceeding with the DPO file, we have decided to first write the MMLU evaluaiton code and test it on the base and SFT models to see if we need to first adjust the SFT pipeline before further fine-tuning the model with DPO.
+After SFT training, the loss curve showed minimal downward movement. So, instead of proceeding with the DPO file, we decided to first write the MMLU evaluaiton code and test it on the base and SFT models to see if we need to first adjust the SFT pipeline before further fine-tuning the model with DPO. There are some small bugs / changes to make to the SFT script later before doing the final testing, which are noted in docstrings in the sft.py. 
