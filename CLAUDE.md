@@ -39,7 +39,7 @@ Each metric is scoped to what it itself can actually show:
 - Models Evaluated: All
 
 Key scoping notes:
-- **Held-out Dolly loss** is a within-SFT-lineage diagnostic. It is *not* run on the base model (which has never seen the Dolly format, so its loss would be high for reasons unrelated to capability) and it is necessary-but-not-sufficient: it confirms the adapters fit Dolly, not that the model is a good assistant in general.
+- **Held-out Dolly loss** is a within-SFT-lineage diagnostic. It is *not* run on the base model (which has never seen the Dolly format, so its loss would be high for reasons unrelated to capability) and it is necessary-but-not-sufficient: it confirms the adapters fit Dolly, not that the model is a good assistant in general. It should be plotted alongside the training loss during training in weights and biases.
 - **IFEval** is where we claim generalization, because it is verifiable (programmatic constraint checks, no judge model or hand-grading). If SFT+DPO drops materially below SFT here, that surfaces the helpfulness/over-refusal tax from harmless-base DPO—so a separate helpfulness eval is not needed.
 - **MMLU** is measured under format-matched conditions (see below); it reflects capability given that each model receives the prompt format it was trained to expect.
 
