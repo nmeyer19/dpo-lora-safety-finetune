@@ -1,6 +1,5 @@
 # Overview
 
-
 ## SFT Training
 My initial learning rate for SFT was 2e-5. Finetuning on 5k examples from the dolly dataset, the loss curve really didn't seem to move much (looking at the smoothed exponential moving average). That said, I waited to run the full training and actually evaluate on the MMLU dataset. Instead of going straight into the DPO file / training loop, I decided to write up the MMLU eval code first and test it on the base and SFT models. That way, we can either first adjust the SFT pipeline as necessary, or if it actually did meaningfully improve capabilities, we could just save these results and then test on the SFT + DPO model afterwards.
 
@@ -13,3 +12,7 @@ When we do a forward pass on the evaluation prompt, the output is a tensor of sh
 - We then have to index into the tensor for each element in `batch_size` (i.e. every example in the batch). 
 - Then for each example, we look at the position $i$ in `seq_length`, where $i$ is the last token in the sequence where our attention mask is 1 (i.e. not a padding token). 
 - The logits in `vocab_size` at this position represent the model's distribution over what token comes after this position (which is roughly "Answer:") for this example. We'll look up the token IDs for " A", " B", " C", and " D" in this vector and return the argmax of these logits, which is our model's answer.
+
+While the above fixes were small errors, they weren't the real crux of the issue. The real issue (talked about more in the CLUADE.md file) was really that I was conflating what our SFT task was doing/incentivizing and what MMLU is evaluating. As a result, I was expecting our SFT on the dolly dataset to enduce greater capabilities, where it really is training the model to respond in ways like the training examples in the dataset—roughly, "assistant-like" prompt-response ways. However, this isn't what MMLU is measuring. MMLU measure capabilities. The ~2.5% lowering of performance after SFT on this evaluation is likely largley noise that with the final set of refinements to the code should be closed to something <1%. 
+
+Further, what's needed to evaluate the objective of the SFT step is a different type of evaluation, one that more directly tests this assistant-like behavior. It's possible that SFT might indeed degenerate general capabilities and underperform the base model on MMLU (since it's "aligning" the model to specific behavior patterns that *might* overwrite *some* of the capabilities), but to test the "success" of the SFT process here, we need a different benchmark like IFEval. 
